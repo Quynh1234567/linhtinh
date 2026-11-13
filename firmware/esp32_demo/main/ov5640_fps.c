@@ -13,6 +13,12 @@ static bool s_on;
 
 esp_err_t ov_cam_start(int xclk_mhz, int fb_count, bool grab_latest, bool fb_in_psram, bool color)
 {
+    return ov_cam_start_fs(xclk_mhz, fb_count, grab_latest, fb_in_psram, color, FRAMESIZE_QQVGA);
+}
+
+esp_err_t ov_cam_start_fs(int xclk_mhz, int fb_count, bool grab_latest, bool fb_in_psram, bool color,
+                          framesize_t fs)
+{
     if (s_on) {
         esp_camera_deinit();
         s_on = false;
@@ -39,7 +45,7 @@ esp_err_t ov_cam_start(int xclk_mhz, int fb_count, bool grab_latest, bool fb_in_
         .ledc_timer = LEDC_TIMER_0,
         .ledc_channel = LEDC_CHANNEL_0,
         .pixel_format = color ? PIXFORMAT_YUV422 : PIXFORMAT_GRAYSCALE,
-        .frame_size = FRAMESIZE_QQVGA,
+        .frame_size = fs,
         .jpeg_quality = 12,
         .fb_count = fb_count,
         .fb_location = fb_in_psram ? CAMERA_FB_IN_PSRAM : CAMERA_FB_IN_DRAM,

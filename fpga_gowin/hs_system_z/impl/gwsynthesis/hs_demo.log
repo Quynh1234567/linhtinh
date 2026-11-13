@@ -1,0 +1,127 @@
+GowinSynthesis start
+Running parser ...
+Analyzing Verilog file 'D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_demo_top.v'
+Analyzing Verilog file 'D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_deriv.v'
+Analyzing included file 'D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_params.vh'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_deriv.v":35)
+Back to file 'D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_deriv.v'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_deriv.v":35)
+Analyzing Verilog file 'D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_div_pipe.v'
+Analyzing Verilog file 'D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_feat.v'
+Analyzing included file 'D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_params.vh'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_feat.v":42)
+Back to file 'D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_feat.v'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_feat.v":42)
+Analyzing Verilog file 'D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_isqrt_pipe.v'
+Analyzing Verilog file 'D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_iter.v'
+Analyzing included file 'D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_params.vh'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_iter.v":42)
+Back to file 'D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_iter.v'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_iter.v":42)
+Analyzing Verilog file 'D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_uv_ram.v'
+Analyzing Verilog file 'D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\ocsvm_core.v'
+Analyzing included file 'D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\ocsvm_params.vh'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\ocsvm_core.v":36)
+Back to file 'D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\ocsvm_core.v'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\ocsvm_core.v":36)
+Analyzing Verilog file 'D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_engine_sd.v'
+Analyzing included file 'D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_params.vh'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_engine_sd.v":35)
+Back to file 'D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_engine_sd.v'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_engine_sd.v":35)
+Analyzing Verilog file 'D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_img_reader.v'
+Analyzing Verilog file 'D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_pll.v'
+Analyzing Verilog file 'D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_system_top.v'
+Analyzing Verilog file 'D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\sdram_arb.v'
+Analyzing Verilog file 'D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\spi_frame_rx.v'
+Analyzing Verilog file 'D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\sdram.v'
+Analyzing Verilog file 'D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\uart_tx.v'
+Compiling module 'hs_demo_top'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_demo_top.v":2)
+Compiling module 'hs_system_top(DUMP_Z=1,LUT_FILE="D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\log_lut.mem",MEAN_FILE="D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\scaler_mean_q.mem",INV_FILE="D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\scaler_inv_q.mem",SV_FILE="D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\sv_lanes.mem",ALPHA_FILE="D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\alpha.mem",EXP_FILE="D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\exp_lut.mem")'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_system_top.v":19)
+Extracting RAM for identifier 'zbuf'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_system_top.v":177)
+Compiling module 'hs_pll'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_pll.v":8)
+Compiling module 'sdram'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\sdram.v":27)
+WARN  (EX3791) : Expression size 16 truncated to fit in target size 15("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\sdram.v":253)
+Compiling module 'sdram_arb'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\sdram_arb.v":12)
+Compiling module 'spi_frame_rx'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\spi_frame_rx.v":10)
+Extracting RAM for identifier 'fifo'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\spi_frame_rx.v":72)
+WARN  (EX3791) : Expression size 32 truncated to fit in target size 6("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\spi_frame_rx.v":131)
+WARN  (EX3073) : Port 'dbg_we' remains unconnected for this instance("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_engine_sd.v":53)
+Compiling module 'hs_engine_sd(LUT_FILE="D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\log_lut.mem",MEAN_FILE="D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\scaler_mean_q.mem",INV_FILE="D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\scaler_inv_q.mem")'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_engine_sd.v":10)
+Compiling module 'hs_img_reader'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_img_reader.v":8)
+Extracting RAM for identifier 'mem'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_img_reader.v":33)
+WARN  (EX3791) : Expression size 32 truncated to fit in target size 7("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_img_reader.v":80)
+Compiling module 'hs_deriv'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_deriv.v":19)
+Extracting RAM for identifier 'rb0'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_deriv.v":41)
+Extracting RAM for identifier 'rb1'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_deriv.v":42)
+WARN  (EX3791) : Expression size 11 truncated to fit in target size 10("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_deriv.v":124)
+WARN  (EX3791) : Expression size 11 truncated to fit in target size 10("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_deriv.v":125)
+WARN  (EX3791) : Expression size 22 truncated to fit in target size 21("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_deriv.v":126)
+Compiling module 'hs_div_pipe'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_div_pipe.v":12)
+Compiling module 'hs_iter(NIT=64)'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_iter.v":22)
+Extracting RAM for identifier 'rb0'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_iter.v":62)
+Extracting RAM for identifier 'rb1'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_iter.v":63)
+Extracting RAM for identifier 'rb2'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_iter.v":64)
+Extracting RAM for identifier 'rb3'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_iter.v":65)
+Compiling module 'hs_uv_ram'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_uv_ram.v":11)
+Extracting RAM for identifier 'm0'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_uv_ram.v":39)
+Extracting RAM for identifier 'm1'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_uv_ram.v":40)
+Extracting RAM for identifier 'm2'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_uv_ram.v":41)
+Extracting RAM for identifier 'm0'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_uv_ram.v":39)
+Extracting RAM for identifier 'm1'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_uv_ram.v":40)
+Extracting RAM for identifier 'm2'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_uv_ram.v":41)
+Extracting RAM for identifier 'm0'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_uv_ram.v":39)
+Extracting RAM for identifier 'm1'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_uv_ram.v":40)
+Extracting RAM for identifier 'm2'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_uv_ram.v":41)
+Extracting RAM for identifier 'm0'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_uv_ram.v":39)
+Extracting RAM for identifier 'm1'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_uv_ram.v":40)
+Extracting RAM for identifier 'm2'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_uv_ram.v":41)
+Extracting RAM for identifier 'm0'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_uv_ram.v":39)
+Extracting RAM for identifier 'm1'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_uv_ram.v":40)
+Extracting RAM for identifier 'm2'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_uv_ram.v":41)
+Extracting RAM for identifier 'm0'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_uv_ram.v":39)
+Extracting RAM for identifier 'm1'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_uv_ram.v":40)
+Extracting RAM for identifier 'm2'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_uv_ram.v":41)
+Extracting RAM for identifier 'm0'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_uv_ram.v":39)
+Extracting RAM for identifier 'm1'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_uv_ram.v":40)
+Extracting RAM for identifier 'm2'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_uv_ram.v":41)
+Extracting RAM for identifier 'm0'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_uv_ram.v":39)
+Extracting RAM for identifier 'm1'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_uv_ram.v":40)
+Extracting RAM for identifier 'm2'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_uv_ram.v":41)
+Extracting RAM for identifier 'm0'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_uv_ram.v":39)
+Extracting RAM for identifier 'm1'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_uv_ram.v":40)
+Extracting RAM for identifier 'm2'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_uv_ram.v":41)
+Extracting RAM for identifier 'm0'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_uv_ram.v":39)
+Extracting RAM for identifier 'm1'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_uv_ram.v":40)
+Extracting RAM for identifier 'm2'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_uv_ram.v":41)
+WARN  (EX3791) : Expression size 16 truncated to fit in target size 15("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_iter.v":85)
+WARN  (EX3791) : Expression size 9 truncated to fit in target size 8("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_iter.v":118)
+WARN  (EX3791) : Expression size 32 truncated to fit in target size 7("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_iter.v":150)
+WARN  (EX3791) : Expression size 16 truncated to fit in target size 15("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_iter.v":207)
+Compiling module 'hs_feat(LUT_FILE="D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\log_lut.mem",MEAN_FILE="D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\scaler_mean_q.mem",INV_FILE="D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\scaler_inv_q.mem")'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_feat.v":15)
+Extracting RAM for identifier 'lut'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_feat.v":45)
+Extracting RAM for identifier 'smean'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_feat.v":46)
+Extracting RAM for identifier 'sinv'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_feat.v":47)
+Compiling module 'hs_isqrt_pipe(SBW=4)'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_isqrt_pipe.v":7)
+WARN  (EX3791) : Expression size 18 truncated to fit in target size 16("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_isqrt_pipe.v":35)
+WARN  (EX3791) : Expression size 16 truncated to fit in target size 11("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_feat.v":187)
+WARN  (EX3791) : Expression size 27 truncated to fit in target size 11("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_feat.v":189)
+Compiling module 'ocsvm_core(SV_FILE="D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\sv_lanes.mem",ALPHA_FILE="D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\alpha.mem",LUT_FILE="D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\exp_lut.mem")'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\ocsvm_core.v":16)
+Extracting RAM for identifier 'sv_rom'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\ocsvm_core.v":50)
+Extracting RAM for identifier 'alpha_rom'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\ocsvm_core.v":51)
+Extracting RAM for identifier 'lut_rom'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\ocsvm_core.v":52)
+Extracting RAM for identifier 'xmem'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\ocsvm_core.v":53)
+Extracting RAM for identifier 'sq'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\ocsvm_core.v":136)
+WARN  (EX3791) : Expression size 32 truncated to fit in target size 9("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_system_top.v":292)
+Compiling module 'uart_tx(CLKS_PER_BIT=468)'("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\uart_tx.v":4)
+WARN  (EX3791) : Expression size 27 truncated to fit in target size 26("D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_system_top.v":376)
+NOTE  (EX0101) : Current top module is "hs_demo_top"
+[5%] Running netlist conversion ...
+Running device independent optimization ...
+[10%] Optimizing Phase 0 completed
+[15%] Optimizing Phase 1 completed
+[25%] Optimizing Phase 2 completed
+Running inference ...
+[30%] Inferring Phase 0 completed
+[40%] Inferring Phase 1 completed
+[50%] Inferring Phase 2 completed
+[55%] Inferring Phase 3 completed
+Running technical mapping ...
+[60%] Tech-Mapping Phase 0 completed
+[65%] Tech-Mapping Phase 1 completed
+[75%] Tech-Mapping Phase 2 completed
+[80%] Tech-Mapping Phase 3 completed
+[90%] Tech-Mapping Phase 4 completed
+[95%] Generate netlist file "D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\impl\gwsynthesis\hs_demo.vg" completed
+[100%] Generate report file "D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\impl\gwsynthesis\hs_demo_syn.rpt.html" completed
+GowinSynthesis finish

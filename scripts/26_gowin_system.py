@@ -60,6 +60,9 @@ def main():
     ap.add_argument("--build", default="rtl/build")
     ap.add_argument("--clk", type=int, choices=[54, 27], default=54, help="54: qua rPLL · 27: thạch anh trực tiếp")
     ap.add_argument("--nit", type=int, default=0, help="số vòng HS (0 = N_ITER trong hs_params.vh)")
+    ap.add_argument("--dump-z", action="store_true",
+                    help="bản kiểm chứng: in thêm 48 z mỗi kết quả (dùng với --out fpga_gowin/hs_system_z, "
+                         "KHÔNG ghi đè project demo)")
     args = ap.parse_args()
     cfg, out, log, _ = setup(args, "26_gowin_system")
     hs_dir = (Path(args.cases) if args.cases else out / "fpga" / "hs").resolve()
@@ -69,6 +72,8 @@ def main():
             sys.exit(f"Thiếu {need} – chạy 04_export_fpga.py rồi 15_export_rtl.py --lanes 8 với --config configs/hw.yaml")
     n_iter = int(re.search(r"N_ITER\s*=\s*(\d+)", (hs_dir / "hs_params.vh").read_text()).group(1))
     dst = Path(args.out).resolve()
+    if args.dump_z and dst.name == "hs_system":
+        sys.exit("--dump-z phải đi với --out khác (vd fpga_gowin/hs_system_z) để giữ nguyên project demo")
     src = dst / "src"
     if src.exists():
         shutil.rmtree(src)
@@ -98,7 +103,7 @@ module hs_demo_top (
     output wire [10:0] O_sdram_addr, output wire [1:0] O_sdram_ba, output wire [3:0] O_sdram_dqm
 );
     hs_system_top #(
-        .USE_PLL({use_pll}), .CLK_HZ({clk_hz}), .NIT({args.nit}),
+        .USE_PLL({use_pll}), .CLK_HZ({clk_hz}), .NIT({args.nit}), .DUMP_Z({1 if args.dump_z else 0}),
         .LUT_FILE("{mem['log_lut.mem']}"), .MEAN_FILE("{mem['scaler_mean_q.mem']}"),
         .INV_FILE("{mem['scaler_inv_q.mem']}"), .SV_FILE("{mem['sv_lanes.mem']}"),
         .ALPHA_FILE("{mem['alpha.mem']}"), .EXP_FILE("{mem['exp_lut.mem']}")

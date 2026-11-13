@@ -137,13 +137,20 @@ def main():
          f"Một cặp ảnh 160 × 120, {N} vòng Jacobi = {upd:_} lần cập nhật điểm ảnh; mọi bản CPU tính đúng cùng thuật toán "
          "và bản số nguyên khớp từng bit với RTL.".replace("_", " "), "",
          f"**Mốc so sánh: {ref['name']} = {ref['ms']:.2f} ms / cặp.**", "",
-         "| Nền tảng | ms / cặp | Chu kỳ / điểm / vòng | Cặp / giây tối đa | Đạt 12,5 fps? | FPGA nhanh hơn |",
+         "| Nền tảng | ms / cặp | Chu kỳ / điểm / vòng | Cặp / giây tối đa | Đạt 12,5 fps? | So với mốc |",
          "|---|---|---|---|---|---|"]
     allr = fpga_rows + cpu
+
+    def rel(r):                                   # so với mốc (FPGA demo 1): chậm hơn / nhanh hơn bao nhiêu lần
+        k = r["ms"] / ref["ms"]
+        if r is ref or abs(k - 1) < 0.005:
+            return "mốc"
+        return f"mốc nhanh hơn {k:.1f}×" if k > 1 else f"nhanh hơn mốc {1 / k:.1f}×"
+
     for r in allr:
         c = cyc(r)
         L.append(f"| {r['name']} | {r['ms']:.2f} | {('%.1f' % c) if c else '–'} | {1000 / r['ms']:.1f} | "
-                 f"{'có' if r['ms'] <= 80 else 'không'} | {r['ms'] / ref['ms']:.1f}× |")
+                 f"{'có' if r['ms'] <= 80 else 'không'} | {rel(r)} |")
     esp_best = min((r for r in cpu if r["group"] == "esp32"), key=lambda r: r["ms"], default=None)
     pc_best = min((r for r in cpu if r["group"] == "pc"), key=lambda r: r["ms"], default=None)
     L += ["", "## Kết luận định lượng", ""]
@@ -160,13 +167,13 @@ def main():
                  f"tuyệt đối vì chạy ở GHz" + (f" ({c:.0f} chu kỳ / điểm / vòng, FPGA ít chu kỳ hơn {c / cyc(ref):.0f}×)" if c else "")
                  + ". FPGA thắng ở chỗ chạy trong hệ nhúng công suất thấp, thời gian xác định, không cần PC.")
     if sim_ms_100:
-        L.append(f"- **Kiến trúc đầy đủ** (gói DERIV trong SDRAM, đọc burst, 100 MHz) mô phỏng {sim_ms_100:.1f} ms → "
+        L.append(f"- **Kiến trúc đầy đủ** (gói DERIV 64 bit trong SDRAM, đọc 1 gói / 2 chu kỳ, 100 MHz, chưa tính refresh SDRAM) mô phỏng {sim_ms_100:.1f} ms → "
                  + (f"{esp_best['ms'] / sim_ms_100:.0f}× so với ESP32-S3" if esp_best else "") + "; là hướng tối ưu sau demo 1.")
     if fpga and fpga.get("measured"):
         L += ["", "## Số đo hệ thống trên board (demo 1)", "",
               f"- Thời gian HS trung vị {fpga['ms']:.2f} ms; từ lúc nhận đủ ảnh tới kết quả {fpga.get('lat_ms') or 0:.2f} ms",
               f"- Tốc độ kết quả {fpga.get('rate') or 0:.2f} cặp/s · cặp bị bỏ {fpga.get('drops')} / khung nhận {fpga.get('frames')}"
-              f" · lỗi SDRAM tự kiểm tra {fpga.get('sd')}", f"- Nguồn: `{fpga['src']}`"]
+              + (f" · lỗi SDRAM tự kiểm tra {fpga.get('sd')}" if fpga.get('sd') is not None else " · tự kiểm tra SDRAM: chưa ghi (mở monitor trước khi reset FPGA)"), f"- Nguồn: `{fpga['src']}`"]
 
     # ---------------------------------------------------------------- tài nguyên, độ chính xác
     gw_p = Path(args.gowin) if args.gowin else out / "gowin_metrics.json"
@@ -174,7 +181,7 @@ def main():
         g = json.loads(gw_p.read_text(encoding="utf-8"))
         L += ["", "## Tài nguyên FPGA (báo cáo Gowin)", "", "| Tài nguyên | Dùng | Có | % |", "|---|---|---|---|"]
         for k, tot, lab in (("lut4", "lut4_total", "LUT4"), ("reg", "reg_total", "Thanh ghi"),
-                            ("bsram", "bsram_total", "BSRAM 18 Kbit"), ("dsp_mult18", "dsp_total", "Nhân 18×18")):
+                            ("bsram", "bsram_total", "BSRAM 18 Kbit"), ("dsp_mult18", "dsp_total", "DSP")):
             if g.get(k) is not None:
                 L.append(f"| {lab} | {g[k]} | {g[tot]} | {100 * g[k] / g[tot]:.0f} % |")
         if g.get("fmax_mhz"):
@@ -218,7 +225,7 @@ def main():
         for yy, v in zip(y, vals):
             ax.text(v, yy, f" {v:.1f} ms", va="center", fontsize=8)
         ax.set_xlabel("ms / cặp ảnh (thang log)")
-        ax.set_title(f"Horn–Schunck {N} vòng, ảnh 160×120 – xanh lá: FPGA · đỏ: ESP32-S3 · xanh dương: PC")
+        ax.set_title(f"Horn–Schunck {N} vòng, ảnh 160×120\nxanh lá: FPGA · đỏ: ESP32-S3 · xanh dương: PC", fontsize=10)
         fig.tight_layout()
         fig.savefig(run / "speedup.png", dpi=150)
         plt.close(fig)

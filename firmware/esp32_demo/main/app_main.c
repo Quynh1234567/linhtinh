@@ -15,7 +15,8 @@
  *    #INFO …
  *    F seq=<n> ts=<µs> dt=<ms×10> g=<µs Gauss> s=<µs SPI> fl=<cờ> d=<quyết định pacer>
  *    D ts=<µs>                       (khung tối, không gửi)
- *    PJ <seq> 160 120 / base64 JPEG / END   ảnh MÀU gốc 160×120 nén JPEG (≈ 6 ảnh/s, trễ thấp)
+ *    PJ <seq> W H age / base64 JPEG / END   ảnh MÀU gốc nén JPEG: 160×120, hoặc 320×240 khi bật
+ *                                            DEMO_PREVIEW_QVGA (camera 320×240, ảnh phân tích = TB 2×2)
  *    PV <seq> 80 60 / base64 / END   ảnh xám 80×60 (khi tắt DEMO_COLOR_PREVIEW)
  *    (mỗi DEMO_PREVIEW_EVERY khung gửi một ảnh)
  * ============================================================================= */
@@ -32,6 +33,9 @@
 #include "freertos/queue.h"
 #include "freertos/task.h"
 #include "img_converters.h"
+#if defined(CONFIG_CAMERA_AF_SUPPORT) && CONFIG_CAMERA_AF_SUPPORT
+#include "esp_camera_af.h"
+#endif
 #include "sdkconfig.h"
 
 #if defined(CONFIG_IDF_TARGET) && !defined(CONFIG_IDF_TARGET_ESP32S3)
@@ -53,11 +57,25 @@
 #define AEC_FOLLOW false
 #endif
 
+#ifdef CONFIG_DEMO_PREVIEW_QVGA
+#define CAM_W 320                           /* camera 320×240; ảnh phân tích 160×120 = trung bình 2×2 */
+#define CAM_H 240
+#define CAM_FS FRAMESIZE_QVGA
+#else
+#define CAM_W PP_W
+#define CAM_H PP_H
+#define CAM_FS FRAMESIZE_QQVGA
+#endif
+#define CAM_PIX (CAM_W * CAM_H)
+#ifndef CONFIG_DEMO_PREVIEW_JPEG_Q
+#define CONFIG_DEMO_PREVIEW_JPEG_Q 80
+#endif
+
 #ifdef CONFIG_DEMO_COLOR_PREVIEW
 #define COLOR 1
-#define PV_W PP_W                           /* chép nguyên khung YUV422 160×120, nén JPEG rồi mới gửi */
-#define PV_H PP_H
-#define PV_BYTES (2 * PP_PIX)
+#define PV_W CAM_W                          /* chép nguyên khung YUV422 của camera, nén JPEG rồi mới gửi */
+#define PV_H CAM_H
+#define PV_BYTES (2 * CAM_PIX)
 #define PV_TAG "PJ"
 #else
 #define COLOR 0
@@ -118,7 +136,8 @@ static void preview_task(void *arg)
 #if COLOR
         uint8_t *jpg = NULL;
         size_t jl = 0;
-        if (fmt2jpg((uint8_t *)pv->px, PV_BYTES, PV_W, PV_H, PIXFORMAT_YUV422, 80, &jpg, &jl) && jpg) {
+        if (fmt2jpg((uint8_t *)pv->px, PV_BYTES, PV_W, PV_H, PIXFORMAT_YUV422, CONFIG_DEMO_PREVIEW_JPEG_Q,
+                    &jpg, &jl) && jpg) {
             int age_ms = (int)((esp_timer_get_time() - pv->t_cap) / 1000);   /* chụp → bắt đầu gửi */
             printf(PV_TAG " %" PRIu32 " %d %d %d\n", pv->seq, PV_W, PV_H, age_ms);
             print_b64(jpg, jl);
@@ -167,11 +186,11 @@ static int detect_y_offset(void)
     for (int k = 0; k < 5; k++) {
         camera_fb_t *fb = esp_camera_fb_get();
         if (!fb) continue;
-        if (fb->len >= 2 * PP_PIX) {
+        if (fb->len >= 2 * CAM_PIX) {
             for (int ph = 0; ph < 2; ph++) {
                 double s = 0, s2 = 0;
-                for (int i = 0; i < PP_PIX; i += 7) { double b = fb->buf[2 * i + ph]; s += b; s2 += b * b; }
-                double n = (PP_PIX + 6) / 7;
+                for (int i = 0; i < CAM_PIX; i += 7) { double b = fb->buf[2 * i + ph]; s += b; s2 += b * b; }
+                double n = (CAM_PIX + 6) / 7;
                 var[ph] += s2 / n - (s / n) * (s / n);
             }
             got++;
@@ -197,8 +216,11 @@ void app_main(void)
     printf("#INFO spi_init=%s\n", esp_err_to_name(err));
     if (err != ESP_OK) return;
 
-    err = ov_cam_start(CONFIG_PP_XCLK_MHZ, 2, true, false, COLOR);   /* bộ đệm camera ở RAM trong: DMA ổn định */
-    printf("#INFO cam_init=%s\n", esp_err_to_name(err));
+    /* 320×240: 1 bộ đệm ở RAM trong; 160×120: 2 bộ đệm như bản cũ. (320×240 YUV hiện báo FB-OVF trên board
+     * này – giữ DEMO_PREVIEW_QVGA TẮT) */
+    err = ov_cam_start_fs(CONFIG_PP_XCLK_MHZ, CAM_W > PP_W ? 1 : 2, CAM_W == PP_W, false, COLOR, CAM_FS);
+    printf("#INFO cam_init=%s cam=%dx%d jpeg_q=%d\n", esp_err_to_name(err), CAM_W, CAM_H,
+           CONFIG_DEMO_PREVIEW_JPEG_Q);
     if (err != ESP_OK) return;
     int vts_lock = 0;
     if (CONFIG_PP_TARGET_FPS_X10 > 0) {
@@ -207,6 +229,23 @@ void app_main(void)
         if (fr.ok) vts_lock = fr.vts_after;
     }
     ov_cam_warmup(CONFIG_PP_WARMUP_FRAMES);
+#if defined(CONFIG_CAMERA_AF_SUPPORT) && CONFIG_CAMERA_AF_SUPPORT
+    {   /* LẤY NÉT TỰ ĐỘNG MỘT LẦN lúc khởi động rồi GIỮ NGUYÊN ống kính (không lấy nét liên tục: ống kính
+         * di chuyển giữa hai khung sẽ tạo chuyển động giả cho Horn–Schunck). Chỉ có tác dụng với module
+         * OV5640 có motor lấy nét (AF); module ống kính cố định thì không đổi gì. */
+        sensor_t *cs = esp_camera_sensor_get();
+        esp_camera_af_status_t st = {0};
+        esp_err_t ae = ESP_ERR_NOT_SUPPORTED;
+        if (cs && esp_camera_af_is_supported(cs)) {
+            esp_camera_af_config_t afc = {.mode = ESP_CAMERA_AF_MODE_MANUAL, .timeout_ms = 3000};
+            ae = esp_camera_af_init(cs, &afc);                       /* nạp firmware AF vào cảm biến */
+            if (ae == ESP_OK) ae = esp_camera_af_trigger(cs);       /* lấy nét 1 lần (vùng giữa ảnh) */
+            if (ae == ESP_OK) ae = esp_camera_af_wait(cs, 3000, &st);
+        }
+        printf("#INFO af=%s focused=%d raw=0x%02X\n", esp_err_to_name(ae), st.focused, st.raw);
+        ov_cam_warmup(5);
+    }
+#endif
 #if COLOR
     s_y_off = detect_y_offset();
     uint8_t *gray = heap_caps_malloc(PP_PIX, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);   /* kênh Y tách ra */
@@ -235,14 +274,27 @@ void app_main(void)
     for (;;) {
         camera_fb_t *fb = esp_camera_fb_get();
         if (!fb) { pacer_reset(&pacer); need_reset = true; continue; }
-        if (fb->len < (COLOR ? 2 : 1) * PP_PIX) { esp_camera_fb_return(fb); continue; }
+        if (fb->len < (COLOR ? 2 : 1) * CAM_PIX) { esp_camera_fb_return(fb); continue; }
         int64_t ts = ov_cam_fb_ts_us(fb);
         pacer_decision_t d = pacer_feed(&pacer, ts);
         if (d == PACER_SKIP) { esp_camera_fb_return(fb); continue; }
 
         int64_t t0 = esp_timer_get_time();
 #if COLOR
+#if CAM_W == PP_W
         for (int i = 0; i < PP_PIX; i++) gray[i] = fb->buf[2 * i + s_y_off];
+#else
+        /* 320×240 → 160×120: trung bình 2×2 kênh Y, làm tròn (giống thu nhỏ INTER_AREA của pipeline train) */
+        for (int y = 0; y < PP_H; y++) {
+            const uint8_t *r0 = fb->buf + (size_t)(2 * y) * CAM_W * 2 + s_y_off;
+            const uint8_t *r1 = r0 + CAM_W * 2;
+            uint8_t *g = gray + y * PP_W;
+            for (int x = 0; x < PP_W; x++) {
+                int k = 4 * x;                          /* 2 điểm ngang × 2 byte/điểm */
+                g[x] = (uint8_t)((r0[k] + r0[k + 2] + r1[k] + r1[k + 2] + 2) >> 2);
+            }
+        }
+#endif
         const uint8_t *src = gray;
 #else
         const uint8_t *src = fb->buf;

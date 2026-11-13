@@ -16,6 +16,9 @@ typedef struct {
  * color = false: PIXFORMAT_GRAYSCALE (Y8, 1 byte/điểm)
  * color = true : PIXFORMAT_YUV422    (Y U Y V, 2 byte/điểm) – kênh Y là cùng ảnh xám Y8 của cảm biến */
 esp_err_t ov_cam_start(int xclk_mhz, int fb_count, bool grab_latest, bool fb_in_psram, bool color);
+/* Như trên nhưng chọn kích thước khung (FRAMESIZE_QQVGA 160×120, FRAMESIZE_QVGA 320×240 …) */
+esp_err_t ov_cam_start_fs(int xclk_mhz, int fb_count, bool grab_latest, bool fb_in_psram, bool color,
+                          framesize_t fs);
 
 /* Bỏ n khung đầu */
 void ov_cam_warmup(int n);

@@ -1,9 +1,0 @@
-// Tang Nano 20K (GW2AR-LV18QN88C8/I7) – top hs_board_top
-IO_LOC  "clk" 4;                 // thạch anh 27 MHz
-IO_PORT "clk" IO_TYPE=LVCMOS33 PULL_MODE=UP;
-IO_LOC  "uart_tx" 69;            // FPGA → BL616 → cổng COM trên PC (kiểm tra theo schematic)
-IO_PORT "uart_tx" IO_TYPE=LVCMOS33 PULL_MODE=UP;
-IO_LOC  "led_busy_n" 15;         // LED0: đảo mỗi lần chạy xong
-IO_PORT "led_busy_n" IO_TYPE=LVCMOS33 PULL_MODE=UP DRIVE=8;
-IO_LOC  "led_anomaly_n" 16;      // LED1: sáng khi cờ bất thường = 1
-IO_PORT "led_anomaly_n" IO_TYPE=LVCMOS33 PULL_MODE=UP DRIVE=8;

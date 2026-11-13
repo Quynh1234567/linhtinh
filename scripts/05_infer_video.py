@@ -7,7 +7,7 @@ VIDEO KẾT QUẢ giữ nguyên bản gốc: màu, độ phân giải và tốc 
 khung viền xanh/đỏ, nhãn NORMAL/ABNORMAL, điểm số và đồ thị điểm theo thời gian.
 
     python scripts/05_infer_video.py --video path/to/clip.avi --save-video
-    python scripts/05_infer_video.py --video data\IITB-Corridor\Test\000251.avi --config configs/hw.yaml --save-video --show       # xem trực tiếp
+    python scripts/05_infer_video.py --video data\IITB-Corridor\Test\000216.avi --config configs/hw.yaml --save-video --show       # xem trực tiếp
     python scripts/05_infer_video.py --video clip.avi --save-video --scale 0.5 # thu nhỏ video ra
     python scripts/05_infer_video.py --camera 0
 """

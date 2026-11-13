@@ -2,7 +2,7 @@
 """MÀN HÌNH DEMO 1 – đọc kết quả FPGA (và ảnh xem trước từ ESP32), hiển thị trực tiếp, ghi số liệu.
 
     python scripts/27_demo_monitor.py --fpga COM5                       # chỉ kết quả FPGA
-    python scripts/27_demo_monitor.py --fpga COM5 --esp COM7            # + ảnh camera 80×60 từ ESP32
+    python scripts/27_demo_monitor.py --fpga COM9 --esp COM5            # + ảnh camera 80×60 từ ESP32
     python scripts/27_demo_monitor.py --fpga COM5 --esp COM7 --minutes 5 --no-gui
 
 FPGA (115 200 baud) gửi:  SD E=0000 W=0800 K=36      (tự kiểm tra SDRAM, K = MHz hex)
@@ -10,7 +10,9 @@ FPGA (115 200 baud) gửi:  SD E=0000 W=0800 K=36      (tự kiểm tra SDRAM, K
 ESP32 (921 600 baud) gửi: F seq=… g=µs Gauss s=µs SPI …
                           PC seq 160 120 / base64 / END   ảnh MÀU gốc (Y 160×120 + U 80×60 + V 80×60)
                           PV seq 80 60 / base64 / END     ảnh xám (firmware cũ hoặc tắt DEMO_COLOR_PREVIEW)
-Phím: q thoát · s chụp màn hình · c đổi chỗ U/V (nếu màu da ra xanh/tím).  Kết quả: outputs_hw/demo_runs/<thời gian>/ (CSV + summary.json)
+Phím: q thoát · s chụp màn hình · r tạm dừng/tiếp tục quay video · c đổi chỗ U/V (nếu màu da ra xanh/tím).
+Mặc định QUAY LẠI toàn bộ màn hình demo thành demo_screen.avi (MJPG chất lượng cao, phóng 2×; tắt bằng --no-record).
+Nộp/chiếu: nén sang H.264 nét mà nhẹ:  ffmpeg -i demo_screen.avi -c:v libx264 -crf 16 -preset slow -pix_fmt yuv420p demo_screen.mp4  Kết quả: outputs_hw/demo_runs/<thời gian>/ (CSV + summary.json)
 """
 from __future__ import annotations
 
@@ -51,6 +53,36 @@ def yuv420_to_bgr(data: bytes, w: int, h: int, swap_uv: bool = False) -> np.ndar
 
 
 RE_B64 = re.compile(r"^[A-Za-z0-9+/=]+$")
+
+
+def enhance_preview(img, size):
+    """CHỈ ĐỂ HIỂN THỊ (không ảnh hưởng FPGA): ảnh 160×120 → size. Bớt khối JPEG, cân sáng cục bộ
+    (mặt bị ngược sáng), phóng 2 bậc bicubic và làm nét ở mỗi bậc. ~10 ms / khung."""
+    import cv2
+    img = cv2.bilateralFilter(img, 5, 25, 5)
+    lab = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
+    lab[..., 0] = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(4, 4)).apply(lab[..., 0])
+    img = cv2.cvtColor(lab, cv2.COLOR_LAB2BGR)
+    h, w = img.shape[:2]
+    img = cv2.resize(img, (w * 2, h * 2), interpolation=cv2.INTER_CUBIC)
+    img = cv2.addWeighted(img, 1.8, cv2.GaussianBlur(img, (0, 0), 1.5), -0.8, 0)
+    img = cv2.resize(img, size, interpolation=cv2.INTER_CUBIC)
+    return cv2.addWeighted(img, 1.4, cv2.GaussianBlur(img, (0, 0), 2.0), -0.4, 0)
+
+
+def dpi_aware():
+    """Windows đang phóng cửa sổ 125–150 % (Display scaling) bằng cách kéo giãn ảnh → mờ thêm.
+    Báo cho Windows biết chương trình tự lo DPI để cửa sổ hiển thị đúng từng điểm ảnh."""
+    if sys.platform != "win32":
+        return
+    import ctypes
+    try:
+        ctypes.windll.shcore.SetProcessDpiAwareness(2)
+    except Exception:  # noqa: BLE001
+        try:
+            ctypes.windll.user32.SetProcessDPIAware()
+        except Exception:  # noqa: BLE001
+            pass
 
 
 def s32(v: int) -> int:
@@ -110,6 +142,9 @@ def reader(port: str, baud: int, tag: str, q: queue.Queue, stop: threading.Event
                     w, h = pv["w"], pv["h"]
                     if pv.get("jpg"):                        # ảnh màu nén JPEG (firmware mới, trễ thấp)
                         import cv2
+                        if not data.rstrip(b"\x00").endswith(b"\xff\xd9"):   # JPEG thiếu đuôi (mất byte trên UART)
+                            pv = None                                    # → bỏ ảnh này, giữ ảnh trước
+                            continue
                         img = cv2.imdecode(np.frombuffer(data, np.uint8), cv2.IMREAD_COLOR)
                         if img is not None:
                             q.put(("pv", tag, (pv["seq"], img, w, h, False, t,
@@ -176,6 +211,12 @@ def main():
     ap.add_argument("--no-gui", action="store_true")
     ap.add_argument("--no-sharpen", action="store_true", help="tắt làm sắc nét ảnh xem trước")
     ap.add_argument("--swap-uv", action="store_true", help="đổi chỗ U/V của ảnh màu (camera xuất YVYU)")
+    ap.add_argument("--no-record", action="store_true", help="không quay video màn hình demo")
+    ap.add_argument("--record-fps", type=float, default=15.0, help="số khung/giây của video quay màn hình")
+    ap.add_argument("--record-codec", choices=["mjpg", "mp4v"], default="mjpg",
+                    help="mjpg = .avi chất lượng ~100 (nét, file lớn); mp4v = .mp4 cũ (nhỏ nhưng nhòe chữ)")
+    ap.add_argument("--record-scale", type=int, default=2, choices=[1, 2, 3],
+                    help="phóng khung quay theo kiểu điểm ảnh (nearest) để chữ và ảnh không bị nhòe khi chiếu toàn màn hình")
     ap.add_argument("--out", default=str(ROOT / "outputs_hw" / "demo_runs"))
     a = ap.parse_args()
     try:
@@ -184,6 +225,7 @@ def main():
         sys.exit("Cần pyserial: pip install pyserial")
     gui = not a.no_gui
     if gui:
+        dpi_aware()
         try:
             import cv2
         except ImportError:
@@ -214,6 +256,7 @@ def main():
     pv_lat, pv_times = None, []
     last = None
     thr, calib = a.thr, []
+    rec, rec_on, rec_next, rec_n = None, not a.no_record, 0.0, 0     # quay video màn hình demo
     t0 = time.time()
     if a.calib_sec:
         print(f"HIỆU CHỈNH: {a.calib_sec:.0f} s đầu chỉ để cảnh BÌNH THƯỜNG trước camera …")
@@ -283,26 +326,29 @@ def main():
                     pv_times.append(time.time())
                     pv_raw = (img, w, h) if is_color else None
                     preview = yuv420_to_bgr(img, w, h, swap_uv) if is_color else img
-                elif kind == "txt" and not gui:
-                    print(f"[{tag}] {d}")
+                elif kind == "txt" and (not gui or d.startswith("#INFO") or "cam_hal" in d or "FB-OVF" in d):
+                    print(f"[{tag}] {d}", flush=True)               # GUI: vẫn in log khởi động / lỗi camera
             if gui:
                 import cv2
                 W, H = 960, 560
                 cv = np.full((H, W, 3), 245, np.uint8)
                 anom = anom_state
-                col = (0, 0, 220) if anom else (40, 160, 40)
+                waiting = bool(a.esp) and esp_frames == 0     # FPGA còn chạy dữ liệu cũ trong SDRAM: chưa có camera thì chưa kết luận
+                col = (150, 150, 150) if waiting else ((0, 0, 220) if anom else (40, 160, 40))
                 if preview is not None:
-                    big = cv2.resize(preview, (480, 360), interpolation=cv2.INTER_LANCZOS4)
-                    if big.ndim == 3 and not a.no_sharpen:              # làm sắc nét nhẹ (chỉ hiển thị)
-                        big = cv2.addWeighted(big, 1.6, cv2.GaussianBlur(big, (0, 0), 1.2), -0.6, 0)
+                    if preview.ndim == 3 and not a.no_sharpen:           # làm rõ (chỉ hiển thị)
+                        big = enhance_preview(preview, (480, 360))
+                    else:
+                        big = cv2.resize(preview, (480, 360), interpolation=cv2.INTER_CUBIC)
                     cv[20:380, 20:500] = big if big.ndim == 3 else cv2.cvtColor(big, cv2.COLOR_GRAY2BGR)
-                    cv2.putText(cv, f"camera seq {pv_seq}" + ("  (mau goc 160x120)" if big.ndim == 3 else "  (xam)"),
+                    cv2.putText(cv, f"camera seq {pv_seq}" + (f"  (mau goc {preview.shape[1]}x{preview.shape[0]})"
+                                                              if big.ndim == 3 else "  (xam)"),
                                 (28, 372), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
                 else:
                     cv2.putText(cv, "(khong co anh xem truoc: them --esp COMx)", (40, 200),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.55, (90, 90, 90), 1)
                 cv2.rectangle(cv, (16, 16), (504, 384), col, 6)
-                cv2.putText(cv, "BAT THUONG" if anom else "BINH THUONG", (530, 60), cv2.FONT_HERSHEY_SIMPLEX, 1.2, col, 3)
+                cv2.putText(cv, "CHO CAMERA..." if waiting else ("BAT THUONG" if anom else "BINH THUONG"), (530, 60), cv2.FONT_HERSHEY_SIMPLEX, 1.2, col, 3)
                 el = max(time.time() - t0, 1e-6)
                 lines = []
                 if last:
@@ -314,20 +360,25 @@ def main():
                              f"Chu ky/diem/vong: {last['C'] / (19200 * a.n_iter):.2f}",
                              f"ESP32-S3 CPU : {a.cpu_ms:.0f} ms  ->  nhanh hon {a.cpu_ms / last['hs_ms']:.0f}x",
                              f"Toc do ket qua: {fps:.1f} cap/s",
-                             f"f_q = {last['F']}   co FPGA = {last['A']}" + (f"  nguong {thr:.0f}" if thr is not None else ""),
+                             f"f_q = {last['F']}   co FPGA = {last['A']}",
+                             f"Nguong hien thi: {thr:.0f}" if thr is not None else "Nguong: THR_q trong FPGA",
                              f"Bao hoa u,v: {last['S']}   bo cap: {last['D']}   nhan: {last['R']}",
-                             f"SDRAM: {'OK' if sd and sd['E'] == 0 else ('LOI' if sd else '?')}  {mhz:.0f} MHz",
+                             (f"SDRAM: {'OK' if sd['E'] == 0 else 'LOI'}   xung nhip FPGA: {mhz:.0f} MHz" if sd
+                              else f"Xung nhip FPGA: {mhz:.0f} MHz"),
                              f"ESP32 da gui: {esp_frames} khung   thoi gian: {el:.0f} s"]
                 else:
-                    lines = ["Cho ket qua tu FPGA ...", f"SDRAM: {'OK' if sd and sd['E'] == 0 else '?'}"]
+                    lines = ["Cho ket qua tu FPGA ..."]
                 pv_times[:] = [x for x in pv_times if time.time() - x < 2.0]
                 if pv_lat and pv_lat.get("age") is not None:
-                    lines.append(f"Anh: {len(pv_times) / 2:.1f} anh/s  tre: ESP {pv_lat['age']} + truyen "
-                                 f"{pv_lat['tx']:.0f} + PC {pv_lat.get('pc', 0):.0f} ms")
+                    lines.append(f"Camera: {len(pv_times) / 2:.1f} anh/s")
+                    lines.append(f"Tre anh: ESP {pv_lat['age']} + truyen {pv_lat['tx']:.0f} + PC {pv_lat.get('pc', 0):.0f} ms")
                 if a.calib_sec and thr is None:
                     lines.insert(0, f"HIEU CHINH: canh binh thuong ({time.time() - t0:.0f}/{a.calib_sec:.0f} s)")
                 for i, s in enumerate(lines):
-                    cv2.putText(cv, s, (530, 110 + 26 * i), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (30, 30, 30), 1)
+                    fs = 0.62                                    # chữ to, tự thu nhỏ nếu dòng tràn mép phải
+                    while fs > 0.4 and 530 + cv2.getTextSize(s, cv2.FONT_HERSHEY_SIMPLEX, fs, 1)[0][0] > W - 10:
+                        fs -= 0.02
+                    cv2.putText(cv, s, (530, 104 + 24 * i), cv2.FONT_HERSHEY_SIMPLEX, fs, (30, 30, 30), 1, cv2.LINE_AA)
                 if len(fq_hist) > 1:                             # đồ thị f_q
                     v = np.array(fq_hist, np.float64)
                     lo, hi = v.min(), v.max()
@@ -336,6 +387,36 @@ def main():
                            for i, x in enumerate(v)]
                     cv2.polylines(cv, [np.array(pts, np.int32)], False, (180, 90, 20), 2)
                     cv2.putText(cv, "f_q (150 ket qua gan nhat)", (20, 400), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (90, 90, 90), 1)
+                if rec_on:                                       # quay video: chèn khung theo đồng hồ → đúng tốc độ thật
+                    now = time.time()
+                    if rec is None:
+                        rec_path = run / ("demo_screen.avi" if a.record_codec == "mjpg" else "demo_screen.mp4")
+                        rec_size = (cv.shape[1] * a.record_scale, cv.shape[0] * a.record_scale)
+                        rec = cv2.VideoWriter(str(rec_path), cv2.VideoWriter_fourcc(*("MJPG" if a.record_codec == "mjpg" else "mp4v")),
+                                              a.record_fps, rec_size)
+                        try:
+                            rec.set(cv2.VIDEOWRITER_PROP_QUALITY, 100)   # MJPG: chất lượng JPEG tối đa
+                        except Exception:
+                            pass
+                        if not rec.isOpened():
+                            print(f"Không mở được bộ ghi {a.record_codec} – tắt quay video", flush=True)
+                            rec, rec_on = None, False
+                        else:
+                            rec_next = now
+                            print(f"Đang quay video {rec_size[0]}x{rec_size[1]} → {rec_path}  (phím r: tạm dừng/tiếp tục)", flush=True)
+                if rec_on and rec is not None:
+                    now = time.time()
+                    if now >= rec_next:
+                        stamp = cv.copy()
+                        cv2.putText(stamp, time.strftime("%Y-%m-%d %H:%M:%S"), (W - 190, H - 8),
+                                    cv2.FONT_HERSHEY_SIMPLEX, 0.45, (120, 120, 120), 1)
+                        if a.record_scale > 1:
+                            stamp = cv2.resize(stamp, rec_size, interpolation=cv2.INTER_NEAREST)
+                        while now >= rec_next:                   # PC chậm thì lặp lại khung để video không bị tua nhanh
+                            rec.write(stamp)
+                            rec_n += 1
+                            rec_next += 1.0 / a.record_fps
+                    cv2.circle(cv, (W - 20, 20), 7, (0, 0, 220), -1)   # chấm đỏ: đang quay (chỉ trên màn hình)
                 cv2.imshow("DATN - HS + OC-SVM tren Tang Nano 20K", cv)
                 k = cv2.waitKey(1) & 0xFF
                 if k == ord("q"):
@@ -350,9 +431,16 @@ def main():
                     print(f"Lưu ảnh xem trước: {'BẬT' if save_pv else 'TẮT'} → {run / 'preview'}")
                 if k == ord("s"):
                     cv2.imwrite(str(run / f"screen_{int(time.time())}.png"), cv)
+                if k == ord("r") and not a.no_record:
+                    rec_on = not rec_on
+                    rec_next = time.time()
+                    print(f"Quay video: {'TIẾP TỤC' if rec_on else 'TẠM DỪNG'}", flush=True)
     except KeyboardInterrupt:
         pass
     stop.set()
+    if rec is not None:
+        rec.release()
+        print(f"Video demo: {rec_path}  ({rec_n} khung, {rec_n / a.record_fps:.0f} s)")
     f_hs.close()
     f_es.close()
     summ = {"threshold_display": thr, "results": len(res), "esp_frames_sent": esp_frames, "clock_mhz": mhz, "sdram_errors": sd["E"] if sd else None,

@@ -1,0 +1,77 @@
+{
+    "Device": "GW2AR-18C",
+    "Files": [
+        {
+            "Path": "D:/datn/ocsvm_anomaly_fpga/fpga_gowin/hs_system_z/src/hs_demo_top.v",
+            "Type": "verilog"
+        },
+        {
+            "Path": "D:/datn/ocsvm_anomaly_fpga/fpga_gowin/hs_system_z/src/hs_deriv.v",
+            "Type": "verilog"
+        },
+        {
+            "Path": "D:/datn/ocsvm_anomaly_fpga/fpga_gowin/hs_system_z/src/hs_div_pipe.v",
+            "Type": "verilog"
+        },
+        {
+            "Path": "D:/datn/ocsvm_anomaly_fpga/fpga_gowin/hs_system_z/src/hs_feat.v",
+            "Type": "verilog"
+        },
+        {
+            "Path": "D:/datn/ocsvm_anomaly_fpga/fpga_gowin/hs_system_z/src/hs_isqrt_pipe.v",
+            "Type": "verilog"
+        },
+        {
+            "Path": "D:/datn/ocsvm_anomaly_fpga/fpga_gowin/hs_system_z/src/hs_iter.v",
+            "Type": "verilog"
+        },
+        {
+            "Path": "D:/datn/ocsvm_anomaly_fpga/fpga_gowin/hs_system_z/src/hs_uv_ram.v",
+            "Type": "verilog"
+        },
+        {
+            "Path": "D:/datn/ocsvm_anomaly_fpga/fpga_gowin/hs_system_z/src/ocsvm_core.v",
+            "Type": "verilog"
+        },
+        {
+            "Path": "D:/datn/ocsvm_anomaly_fpga/fpga_gowin/hs_system_z/src/hs_engine_sd.v",
+            "Type": "verilog"
+        },
+        {
+            "Path": "D:/datn/ocsvm_anomaly_fpga/fpga_gowin/hs_system_z/src/hs_img_reader.v",
+            "Type": "verilog"
+        },
+        {
+            "Path": "D:/datn/ocsvm_anomaly_fpga/fpga_gowin/hs_system_z/src/hs_pll.v",
+            "Type": "verilog"
+        },
+        {
+            "Path": "D:/datn/ocsvm_anomaly_fpga/fpga_gowin/hs_system_z/src/hs_system_top.v",
+            "Type": "verilog"
+        },
+        {
+            "Path": "D:/datn/ocsvm_anomaly_fpga/fpga_gowin/hs_system_z/src/sdram_arb.v",
+            "Type": "verilog"
+        },
+        {
+            "Path": "D:/datn/ocsvm_anomaly_fpga/fpga_gowin/hs_system_z/src/spi_frame_rx.v",
+            "Type": "verilog"
+        },
+        {
+            "Path": "D:/datn/ocsvm_anomaly_fpga/fpga_gowin/hs_system_z/src/sdram.v",
+            "Type": "verilog"
+        },
+        {
+            "Path": "D:/datn/ocsvm_anomaly_fpga/fpga_gowin/hs_system_z/src/uart_tx.v",
+            "Type": "verilog"
+        }
+    ],
+    "IncludePath": [
+        "D:/datn/ocsvm_anomaly_fpga/fpga_gowin/hs_system_z/src"
+    ],
+    "LoopLimit": 2000,
+    "ResultFile": "D:/datn/ocsvm_anomaly_fpga/fpga_gowin/hs_system_z/impl/temp/rtl_parser.result",
+    "Top": "hs_demo_top",
+    "VerilogStd": "verilog_2001",
+    "VhdlStd": "vhdl_93"
+}

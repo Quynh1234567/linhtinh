@@ -11,6 +11,8 @@
 // Khởi động: tự kiểm tra SDRAM (8 192 byte trên 4 bank) → "SD E=0000 W=0800 K=36" (E = số từ sai).
 // Mỗi cặp ảnh: "HS N=… Q=seq C=chu kỳ HS T=chu kỳ từ lúc nhận đủ ảnh tới kết quả F=f_q A=cờ S=bão hòa
 //               Z=Σz D=số cặp bị bỏ R=số khung nhận" (hex). Thời gian = chu kỳ / K MHz.
+//   DUMP_Z = 1 (chỉ dùng cho phát lại IITB, scripts/34_fpga_replay.py): nối thêm " ZV=" + 48 z × 4 hex
+//   (z0 trước, 16 bit bù 2) vào cuối dòng HS để PC so TỪNG phần tử. DUMP_Z = 0: giống hệt bản demo.
 // LED (sáng = 0): 0 đảo mỗi kết quả · 1 bất thường · 2 đảo mỗi khung nhận · 3 lỗi SDRAM · 4 đang tính · 5 nhịp 1 Hz
 // -----------------------------------------------------------------------------
 `timescale 1ns / 1ps
@@ -20,6 +22,7 @@ module hs_system_top #(
     parameter integer BAUD       = 115_200,
     parameter integer NIT        = 0,               // 0 = N_ITER của hs_params.vh
     parameter integer EARLY_CAPTURE = 1,
+    parameter integer DUMP_Z     = 0,               // 1: in thêm 48 z mỗi kết quả (bản kiểm chứng)
     parameter         LUT_FILE   = "log_lut.mem",
     parameter         MEAN_FILE  = "scaler_mean_q.mem",
     parameter         INV_FILE   = "scaler_inv_q.mem",
@@ -170,6 +173,9 @@ module hs_system_top #(
         .start(svm_start), .busy(svm_busy), .done(svm_done), .f_out(f_out), .anomaly(anomaly));
     reg [15:0] zsum;
     always @(posedge sclk) if (e_start) zsum <= 0; else if (x_we) zsum <= zsum + x_data;
+    // 48 z của cặp vừa tính (chỉ khi DUMP_Z). Cặp sau ghi đè sau ≈ 57 ms, dòng UART gửi xong trong ≈ 25 ms.
+    reg [15:0] zbuf [0:47];
+    always @(posedge sclk) if (DUMP_Z != 0 && x_we && x_addr < 8'd48) zbuf[x_addr[5:0]] <= x_data;
 
     // ================================================================ UART
     reg  [15:0] n_res;
@@ -179,13 +185,15 @@ module hs_system_top #(
     reg  [3:0]  q_a4;
     reg         r_anom;
     wire [7:0]  clk_mhz = CLK_HZ / 1_000_000;
-    reg  [6:0]  ci;
+    localparam integer CI_W = (DUMP_Z != 0) ? 9 : 7;
+    reg  [CI_W-1:0] ci;
     reg  [1:0]  um;                                    // 0 rỗi · 1 gửi SD · 2 gửi HS
     reg         sd_pend, hs_pend, send, wait_busy;
     wire        tx_busy;
     function [7:0] hx; input [3:0] v; hx = (v < 10) ? (8'h30 + v) : (8'h41 + v - 10); endfunction
     reg [7:0] ch_hs, ch_sd;
-    localparam integer N_HS = 83, N_SD = 23;
+    localparam integer ZV0 = 85;                       // ký tự hex đầu tiên của 48 z
+    localparam integer N_HS = (DUMP_Z != 0) ? ZV0 + 192 + 2 : 83, N_SD = 23;
     always @(*) begin
         case (ci)
         0: ch_hs = "H";
@@ -269,11 +277,30 @@ module hs_system_top #(
         78: ch_hs = hx(n_rx[11:8]);
         79: ch_hs = hx(n_rx[7:4]);
         80: ch_hs = hx(n_rx[3:0]);
-        81: ch_hs = 8'h0D;
-        82: ch_hs = 8'h0A;
+        81: ch_hs = (DUMP_Z != 0) ? " " : 8'h0D;
+        82: ch_hs = (DUMP_Z != 0) ? "Z" : 8'h0A;
+        83: ch_hs = "V";
+        84: ch_hs = "=";
+        ZV0 + 192:     ch_hs = 8'h0D;
+        ZV0 + 192 + 1: ch_hs = 8'h0A;
         default: ch_hs = 8'h0A;
         endcase
     end
+    // ký tự hex của 48 z: đọc zbuf qua 2 tầng thanh ghi (ci giữ nguyên ~470 chu kỳ mỗi ký tự,
+    // nên dữ liệu luôn ổn định trước khi uart_tx chốt) – không thêm đường tổ hợp dài vào 54 MHz
+    wire [8:0] ci9 = ci;                               // mở rộng 0 (CI_W = 7 hoặc 9)
+    wire [8:0] kz  = ci9 - ZV0;
+    reg  [15:0] zw_r;
+    reg  [1:0]  zn_r;
+    reg         zon_r;
+    wire in_zv = (DUMP_Z != 0) && (um == 2'd2) && (ci9 >= ZV0) && (ci9 < ZV0 + 192);   // kz[7:2] ∈ 0…47
+    always @(posedge sclk) begin
+        if (in_zv) zw_r <= zbuf[kz[7:2]];              // chỉ đọc trong vùng ZV=: không bao giờ ra ngoài 0…47
+        zn_r  <= kz[1:0];
+        zon_r <= in_zv;
+    end
+    wire [3:0] z_nib = (zn_r == 2'd0) ? zw_r[15:12] : (zn_r == 2'd1) ? zw_r[11:8] :
+                       (zn_r == 2'd2) ? zw_r[7:4]   : zw_r[3:0];
     always @(*) begin
         case (ci)
         0: ch_sd = "S";
@@ -304,7 +331,10 @@ module hs_system_top #(
     end
 
     wire [7:0] ch = (um == 2'd1) ? ch_sd : ch_hs;
-    uart_tx #(.CLKS_PER_BIT(CLK_HZ / BAUD)) u_tx (.clk(sclk), .rst_n(rstn), .data(ch), .send(send), .tx(uart_tx), .busy(tx_busy));
+    reg  [7:0] ch_r;                                   // DUMP_Z: ký tự qua thanh ghi (xem trên)
+    always @(posedge sclk) ch_r <= zon_r ? hx(z_nib) : ch;
+    wire [7:0] ch_tx = (DUMP_Z != 0) ? ch_r : ch;      // DUMP_Z = 0: y hệt bản demo
+    uart_tx #(.CLKS_PER_BIT(CLK_HZ / BAUD)) u_tx (.clk(sclk), .rst_n(rstn), .data(ch_tx), .send(send), .tx(uart_tx), .busy(tx_busy));
     reg tst_done_d;
     always @(posedge sclk or negedge rstn) begin
         if (!rstn) begin

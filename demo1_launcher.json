@@ -12,6 +12,6 @@
   "nit": "0",
   "minutes": "0",
   "esp_baud": "2000000",
-  "rec_minutes": "10",
+  "rec_minutes": "1",
   "smooth": "7"
 }

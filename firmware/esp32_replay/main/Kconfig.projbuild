@@ -1,0 +1,14 @@
+menu "Replay IITB -> FPGA"
+    config REPLAY_SPI_SCLK
+        int "SPI SCLK GPIO (giong esp32_demo)"
+        default 20
+    config REPLAY_SPI_MOSI
+        int "SPI MOSI GPIO"
+        default 21
+    config REPLAY_SPI_CS
+        int "SPI CS GPIO"
+        default 47
+    config REPLAY_SPI_HZ
+        int "SPI clock (Hz)"
+        default 8000000
+endmenu

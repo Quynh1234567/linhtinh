@@ -1,0 +1,18 @@
+-d D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\impl\gwsynthesis\hs_demo.vg
+-p GW2AR-18C-QFN88-8
+-pn GW2AR-LV18QN88C8/I7
+-cst D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_demo.cst
+-cfg D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\impl\pnr\device.cfg
+-sdc D:\datn\ocsvm_anomaly_fpga\fpga_gowin\hs_system_z\src\hs_demo.sdc
+-bit
+-tr
+-ph
+-timing
+-cst_error
+-place_option 2
+-route_option 2
+-retiming_resource none
+-clock_route_order 0
+-correct_hold 1
+-route_maxfan 23
+-global_freq 100.000

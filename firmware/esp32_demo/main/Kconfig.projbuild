@@ -55,6 +55,22 @@ menu "Demo 1 (ĐATN) – camera → SPI → FPGA"
             và gửi FPGA, còn PC nhận ảnh màu 160×120 chưa làm mượt (dòng PC …).
             Tắt: như bản cũ – camera GRAYSCALE, xem trước xám 80×60 (dòng PV …).
 
+    config DEMO_PREVIEW_QVGA
+        bool "Camera 320×240: ảnh xem trước NÉT gấp đôi; ảnh phân tích = trung bình 2×2 xuống 160×120"
+        depends on DEMO_COLOR_PREVIEW
+        default y
+        help
+            Bật: camera chụp 320×240 YUV422. ESP32 lấy trung bình 2×2 kênh Y → 160×120 rồi Gauss, gửi FPGA
+            như cũ (FPGA không đổi); PC nhận ảnh màu 320×240 JPEG. Ảnh phân tích ít nhiễu hơn nhưng KHÁC
+            (nhẹ) so với khi cảm biến tự thu nhỏ → chạy thử demo trước khi dùng thật.
+            Tắt: như bản cũ (camera 160×120).
+
+    config DEMO_PREVIEW_JPEG_Q
+        int "Chất lượng JPEG ảnh xem trước (1–100)"
+        depends on DEMO_COLOR_PREVIEW
+        range 30 100
+        default 80
+
     choice DEMO_YUV_ORDER
         prompt "Vị trí byte Y trong YUV422"
         depends on DEMO_COLOR_PREVIEW

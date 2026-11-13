@@ -1,7 +1,7 @@
 {
     "version":            "1.2",
     "project_name":       "esp32_demo",
-    "project_version":    "60d1f61-dirty",
+    "project_version":    "622600e-dirty",
     "project_path":       "D:/datn/ocsvm_anomaly_fpga/firmware/esp32_demo",
     "idf_path":           "D:/app/Espressif/frameworks/esp-idf-v5.3.5",
     "build_dir":          "D:/datn/ocsvm_anomaly_fpga/firmware/esp32_demo/build",

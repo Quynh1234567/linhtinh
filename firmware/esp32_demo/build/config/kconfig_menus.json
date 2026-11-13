@@ -6620,6 +6620,29 @@
             {
                 "children": [
                     {
+                        "children": [],
+                        "depends_on": "DEMO_COLOR_PREVIEW",
+                        "help": "B\u1eadt: camera ch\u1ee5p 320\u00d7240 YUV422. ESP32 l\u1ea5y trung b\u00ecnh 2\u00d72 k\u00eanh Y \u2192 160\u00d7120 r\u1ed3i Gauss, g\u1eedi FPGA\nnh\u01b0 c\u0169 (FPGA kh\u00f4ng \u0111\u1ed5i); PC nh\u1eadn \u1ea3nh m\u00e0u 320\u00d7240 JPEG. \u1ea2nh ph\u00e2n t\u00edch \u00edt nhi\u1ec5u h\u01a1n nh\u01b0ng KH\u00c1C\n(nh\u1eb9) so v\u1edbi khi c\u1ea3m bi\u1ebfn t\u1ef1 thu nh\u1ecf \u2192 ch\u1ea1y th\u1eed demo tr\u01b0\u1edbc khi d\u00f9ng th\u1eadt.\nT\u1eaft: nh\u01b0 b\u1ea3n c\u0169 (camera 160\u00d7120).",
+                        "id": "DEMO_PREVIEW_QVGA",
+                        "name": "DEMO_PREVIEW_QVGA",
+                        "range": null,
+                        "title": "Camera 320\u00d7240: \u1ea3nh xem tr\u01b0\u1edbc N\u00c9T g\u1ea5p \u0111\u00f4i; \u1ea3nh ph\u00e2n t\u00edch = trung b\u00ecnh 2\u00d72 xu\u1ed1ng 160\u00d7120",
+                        "type": "bool"
+                    },
+                    {
+                        "children": [],
+                        "depends_on": "DEMO_COLOR_PREVIEW",
+                        "help": null,
+                        "id": "DEMO_PREVIEW_JPEG_Q",
+                        "name": "DEMO_PREVIEW_JPEG_Q",
+                        "range": [
+                            30,
+                            100
+                        ],
+                        "title": "Ch\u1ea5t l\u01b0\u1ee3ng JPEG \u1ea3nh xem tr\u01b0\u1edbc (1\u2013100)",
+                        "type": "int"
+                    },
+                    {
                         "children": [
                             {
                                 "children": [],
@@ -35236,7 +35259,10 @@
                                         "help": "Default timeout used for autofocus operations (firmware load, trigger/wait).",
                                         "id": "CAMERA_AF_DEFAULT_TIMEOUT_MS",
                                         "name": "CAMERA_AF_DEFAULT_TIMEOUT_MS",
-                                        "range": null,
+                                        "range": [
+                                            100,
+                                            20000
+                                        ],
                                         "title": "Autofocus default timeout (ms)",
                                         "type": "int"
                                     }

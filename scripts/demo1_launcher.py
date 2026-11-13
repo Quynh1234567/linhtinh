@@ -246,7 +246,7 @@ class Launcher(tk.Tk):
                    lambda: self.open_dir(ROOT / "outputs_hw" / "demo_runs"))
 
     def _tab_record(self, f):
-        ttk.Label(f, text="Ghi cảnh thật để train lại (firmware phải bật DEMO_RECORD trong menuconfig, baud 921600).",
+        ttk.Label(f, text="Ghi cảnh thật để train lại: chạy như demo (esp32_demo + bitstream hs_system_z), đọc 48 z từ cổng FPGA.",
                   style="Head.TLabel").grid(row=0, column=0, columnspan=3, sticky="w", pady=(0, 8))
         opt = ttk.Frame(f)
         opt.grid(row=1, column=0, columnspan=3, sticky="w", pady=4)
@@ -258,14 +258,15 @@ class Launcher(tk.Tk):
                    "● Ghi bình thường → Test", lambda: self.record("normal", True))
         self._step(f, 4, "Cảnh BẤT THƯỜNG để đánh giá (chạy, vung tay, ngã giả) – 2 phút.",
                    "● Ghi bất thường → Test", lambda: self.record("abnormal", True))
-        self._step(f, 5, "Mở thư mục dữ liệu đã ghi.", "📂 data/scene_demo",
-                   lambda: self.open_dir(ROOT / "data" / "scene_demo"))
+        self._step(f, 5, "Huấn luyện lại (IITB + cảnh thật) và so với mô hình hiện tại.", "▶ Train lại",
+                   lambda: self.py("36_train_scene.py", []))
+        self._step(f, 6, "Mở thư mục dữ liệu đã ghi.", "📂 data/scene",
+                   lambda: self.open_dir(ROOT / "data" / "scene"))
 
     def record(self, label, test):
-        if not self._need(("esp_port",)):
+        if not self._need(("fpga_port",)):
             return
-        args = [str(ROOT / "scripts" / "29_record_scene.py"), "--port", self.port("esp_port"), "--baud",
-                self.vars["esp_baud"].get() or "921600", "--label", label,
+        args = [str(ROOT / "scripts" / "29_record_scene.py"), "--fpga", self.port("fpga_port"), "--label", label,
                 "--minutes", self.vars["rec_minutes"].get() or "10"] + (["--test"] if test else [])
         self.run([PY] + args, f"Ghi dữ liệu ({label}{', Test' if test else ''})")
 
